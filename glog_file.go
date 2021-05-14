@@ -22,6 +22,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -45,6 +46,7 @@ func createLogDirs() {
 		logDirs = append(logDirs, *logDir)
 	}
 	logDirs = append(logDirs, os.TempDir())
+	log.Printf("glog logDirs: %v", logDirs)
 }
 
 var (
@@ -111,6 +113,7 @@ func create(tag string, t time.Time) (f *os.File, filename string, err error) {
 	var lastErr error
 	for _, dir := range logDirs {
 		fname := filepath.Join(dir, name)
+		log.Printf("glog write log to: %v", fname)
 		f, err := os.Create(fname)
 		if err == nil {
 			symlink := filepath.Join(dir, link)
@@ -118,6 +121,7 @@ func create(tag string, t time.Time) (f *os.File, filename string, err error) {
 			os.Symlink(name, symlink) // ignore err
 			return f, fname, nil
 		}
+		log.Printf("glog create file error: %v", err)
 		lastErr = err
 	}
 	return nil, "", fmt.Errorf("log: cannot create log: %v", lastErr)
